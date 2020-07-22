@@ -45,6 +45,10 @@ blank(1,11).
 blank(2,11).
 blank(3,11).
 
+% Pre place 2 of the wood squares
+place_resource(4,1,wood).
+place_resource(4,11,wood).
+
 % Choice generator for placing resources
 { place_resource(Row,Col,Res) : Row = 1..rows, Col = 1..columns, not blank(Row,Col) } = Cnt :- resource(Res,Cnt).
 % Each space can only contain 1 resource
@@ -56,8 +60,12 @@ blank(3,11).
 :- place_number(Row,Col,Num1), place_number(Row,Col,Num2), Num1 != Num2.
 % No adjacent numbers can be identical
 :- place_number(Row1,Col1,Num), place_number(Row2,Col2,Num), |Row1-Row2| + |Col1-Col2| = 1.
+% no diagonal numbers can be identical
+:- place_number(Row1,Col1,Num), place_number(Row2,Col2,Num), |Row1-Row2| = 1, |Col1-Col2| = 1.
 % No adjacent numbers can be 6 and 8
 :- place_number(Row1,Col1,6), place_number(Row2,Col2,8), |Row1-Row2| + |Col1-Col2| = 1.
+% no diagonal numbers can be 6 and 8
+:- place_number(Row1,Col1,6), place_number(Row2,Col2,8), |Row1-Row2| = 1, |Col1-Col2| = 1.
 
 % build the board from the previous rules
 board(Row,Col,desert,0) :- place_resource(Row,Col,desert).
@@ -69,5 +77,5 @@ board(Row,Col,Res,Num) :- place_resource(Row,Col,Res), place_number(Row,Col,Num)
 #show board/4.
 
 % Uncomment the following 2 lines to also get a count of all board spaces, this should match rows * cols if configured correctly
-% board_size(Cnt) :- Cnt = #count { Row,Col : board(Row,Col,_,_) }.
-% #show board_size/1.
+board_size(Cnt) :- Cnt = #count { Row,Col : board(Row,Col,_,_) }.
+#show board_size/1.
