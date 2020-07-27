@@ -7,8 +7,10 @@
 %   number_counts = resource_counts - desert_counts
 
 % Constants that set the number of rows and columns
-#const  rows    = 7.
-#const  columns = 11.
+#const  rows        = 7.
+#const  columns     = 11.
+#const  clump_sz    = 3. % # of touching neighbors that defines one resource as clumped
+#const  clumps_max  = 10. % max # of clumped resources
 
 % Set the number of resources, (Resource, Count)
 resource(wheat,13).
@@ -61,11 +63,26 @@ place_resource(4,11,wood).
 % No adjacent numbers can be identical
 :- place_number(Row1,Col1,Num), place_number(Row2,Col2,Num), |Row1-Row2| + |Col1-Col2| = 1.
 % no diagonal numbers can be identical
-:- place_number(Row1,Col1,Num), place_number(Row2,Col2,Num), |Row1-Row2| = 1, |Col1-Col2| = 1.
+:- place_number(Row1,Col1,Num), place_number(Row2,Col2,Num), Row1-Row2 = 1, Col1-Col2 = 1.
+:- place_number(Row1,Col1,Num), place_number(Row2,Col2,Num), Row1-Row2 = -1, Col1-Col2 = -1.
 % No adjacent numbers can be 6 and 8
 :- place_number(Row1,Col1,6), place_number(Row2,Col2,8), |Row1-Row2| + |Col1-Col2| = 1.
 % no diagonal numbers can be 6 and 8
-:- place_number(Row1,Col1,6), place_number(Row2,Col2,8), |Row1-Row2| = 1, |Col1-Col2| = 1.
+:- place_number(Row1,Col1,6), place_number(Row2,Col2,8), Row1-Row2 = 1, Col1-Col2 = 1.
+:- place_number(Row1,Col1,6), place_number(Row2,Col2,8), Row1-Row2 = -1, Col1-Col2 = -1.
+
+% two resources are connected if they are the same type and either adjacent or diagonal
+% we only check the right, bottom, and bottom right to avoid double counting
+resource_connected((Row1,Col1),(Row2,Col2),Res) :- place_resource(Row1,Col1,Res), place_resource(Row2,Col2,Res), Row2-Row1=0, Col2-Col1=1.
+resource_connected((Row1,Col1),(Row2,Col2),Res) :- place_resource(Row1,Col1,Res), place_resource(Row2,Col2,Res), Row2-Row1=1, Col2-Col1=1.
+resource_connected((Row1,Col1),(Row2,Col2),Res) :- place_resource(Row1,Col1,Res), place_resource(Row2,Col2,Res), Row2-Row1=1, Col2-Col1=0.
+
+% a resource is clumped if its connected to at least clump_sz other resources
+resource_clumped((Row,Col),Res) :- place_resource(Row,Col,Res), C1 = #count { R,C : resource_connected((Row,Col),(R,C),Res) }, C2 = #count { R,C : resource_connected((R,C),(Row,Col),Res) }, C1+C2 >= clump_sz.
+clumped_count(C) :- C = #count { Row,Col : resource_clumped((Row,Col),Res) }.
+
+% limit the total number of clumped resources
+:- clumped_count(C), C > clumps_max.
 
 % build the board from the previous rules
 board(Row,Col,desert,0) :- place_resource(Row,Col,desert).
@@ -76,6 +93,8 @@ board(Row,Col,Res,Num) :- place_resource(Row,Col,Res), place_number(Row,Col,Num)
 % we only display the board
 #show board/4.
 
+% #show clumped_count/1.
+
 % Uncomment the following 2 lines to also get a count of all board spaces, this should match rows * cols if configured correctly
-board_size(Cnt) :- Cnt = #count { Row,Col : board(Row,Col,_,_) }.
-#show board_size/1.
+% board_size(Cnt) :- Cnt = #count { Row,Col : board(Row,Col,_,_) }.
+% #show board_size/1.
