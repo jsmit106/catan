@@ -1,3 +1,9 @@
+# New Python Code
+The Python script file applies a different approach to generating the board. Python's generators are used in conjunction with simple recursive backtracking. Use the following command to generate a layout:
+```
+python catan.py
+```
+
 # Catan Board Layout Generator
 
 Use the following command to generate a layout, replacing [seed] with a random integer:
