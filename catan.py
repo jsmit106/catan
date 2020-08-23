@@ -64,7 +64,7 @@ idx = R.index('wood')
 board[3][columns-1][0] = R[idx]
 
 # @yield    rem_R, rem_N
-def fill_cols(R, N, board, row, col):
+def fill_row(R, N, board, row, col):
     if col == len(board[row]):
         yield R, N
     
@@ -83,7 +83,7 @@ def fill_cols(R, N, board, row, col):
                 board[row][col][1] = '0'
                 new_R = lst_rem(r, R)
 
-                iter = fill_cols(new_R, N, board, row, col+1)
+                iter = fill_row(new_R, N, board, row, col+1)
 
                 for rem_R, rem_N in iter:
                     yield rem_R, rem_N
@@ -109,7 +109,7 @@ def fill_cols(R, N, board, row, col):
                     board[row][col][1] = n
                     new_N = lst_rem(n, N)
 
-                    iter = fill_cols(new_R, new_N, board, row, col+1)
+                    iter = fill_row(new_R, new_N, board, row, col+1)
 
                     for rem_R, rem_N in iter:
                         yield rem_R, rem_N
@@ -120,26 +120,26 @@ def fill_cols(R, N, board, row, col):
         board[row][col][1] = None
 
 # @yield    success
-def fill_rows(R,N, board):
-    row_3 = fill_cols(R, N, board, 3, 0)
+def fill_table(R,N, board):
+    row_3 = fill_row(R, N, board, 3, 0)
 
     for r3, n3 in row_3:
-        row_2 = fill_cols(r3, n3, board, 2, 0)
+        row_2 = fill_row(r3, n3, board, 2, 0)
 
         for r2, n2 in row_2:
-            row_1 = fill_cols(r2, n2, board, 1, 0)
+            row_1 = fill_row(r2, n2, board, 1, 0)
 
             for r1, n1 in row_1:
-                row_0 = fill_cols(r1, n1, board, 0, 0)
+                row_0 = fill_row(r1, n1, board, 0, 0)
 
                 for r0, n0 in row_0:
-                    row_4 = fill_cols(r0, n0, board, 4, 0)
+                    row_4 = fill_row(r0, n0, board, 4, 0)
 
                     for r4, n4 in row_4:
-                        row_5 = fill_cols(r4, n4, board, 5, 0)
+                        row_5 = fill_row(r4, n4, board, 5, 0)
 
                         for r5, n5 in row_5:
-                            row_6 = fill_cols(r5, n5, board, 6, 0)
+                            row_6 = fill_row(r5, n5, board, 6, 0)
 
                             for _, _ in row_6:
                                 yield True
@@ -147,7 +147,7 @@ def fill_rows(R,N, board):
                             print(r5)
                             print(n5)
 
-iter = fill_rows(R, N, board)
+iter = fill_table(R, N, board)
 if iter.__next__():
     for row in board:
         print(row)
